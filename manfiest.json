@@ -1,0 +1,7 @@
+{
+	"name": "SimpleMMO Collection Manager",
+	"description": "Helps sort which items you have already collected.",
+	"version": "1.0",
+	"manifest_version": 3
+	"permissions": ["storage"]
+}
