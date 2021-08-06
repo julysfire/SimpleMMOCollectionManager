@@ -1,0 +1,16 @@
+{
+	"name": "SimpleMMO Collection Manager",
+	"description": "Helps sort which items you have already collected.",
+	"version": "1.0",
+	"manifest_version": 2,
+	"permissions": ["tabs","webNavigation","storage","unlimitedStorage","*://*.web.simple-mmo.com/*"],
+	"background":{
+		"scripts": ["src/background.js"],
+		"persistent": true
+	},
+	"content_scripts": [{
+		"matches": ["*://*.web.simple-mmo.com/*"],
+		"js": ["src/content.js"]
+	}],
+	"web_accessible_resources": ["checkmark.png","newItem.png"]
+}
