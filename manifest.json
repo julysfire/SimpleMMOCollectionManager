@@ -12,5 +12,8 @@
 		"matches": ["*://*.web.simple-mmo.com/*"],
 		"js": ["src/content.js"]
 	}],
-	"web_accessible_resources": ["checkmark.png","newItem.png"]
+	"web_accessible_resources": ["imgs/checkmark.png","imgs/newItem.png","imgs/quickSell.png"],
+	"icons": {"16": "imgs/icon16.png",
+						"48": "imgs/icon48.png",
+						"128": "imgs/icon128.png"}
 }

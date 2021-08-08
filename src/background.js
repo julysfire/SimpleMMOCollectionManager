@@ -1,6 +1,13 @@
-//Background working
-var currentTabId;
+//
+//
+// Background Functions
+//
+// Written by Julysfire
+//
+//
 
+//Current tab global variable
+var currentTabId;
 
 //
 //First time install, setup storage
@@ -10,6 +17,8 @@ chrome.runtime.onInstalled.addListener(function(details){
 		chrome.storage.local.set({items: ""}, function(){
 		});
 		chrome.storage.local.set({newItem: ""}, function(){
+		});
+		chrome.storage.local.set({blockList: "Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel:Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;"}, function(){
 		});
 	}
 });
@@ -77,33 +86,46 @@ function checkInventory(str){
 	if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1){
 		newItemAdded();
 	}
-
-	while(str.search('id="item-id') > -1){
-		str = str.substring(str.search('id="item-id'),str.length);
-
-		//Don't worry about foods, i.e. uncollectable
-		var subStr = str.substring(str.search('<button type="button"'),str.length);
-		subStr = subStr.substring(subStr.search(">")+2,subStr.search("</b")-1);
-
-		//Push to array
-		if(subStr == "Collect" || subStr == "Equip") invItems.push([str.substring(str.search(">")+1,str.search("<")), str.substring(12,str.search(">")-1),""]);
-		else invItems.push(["zzz","zzz","zzz"]);
-		str = str.substring(1,str.length);
+	if(str.search('class="text-sm font-medium text-red-800"') > -1){
+		newBlockedItem();
+		chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 	}
+
+	chrome.storage.local.get(["blockList"], function(data){
+		var blockListStr = data.blockList+"";
+		while(str.search('id="item-id') > -1){
+			str = str.substring(str.search('id="item-id'),str.length);
+
+			//Don't worry about foods, i.e. uncollectable
+			var itemId = str.substring(str.search('<button type="button"'),str.length);
+			itemId = itemId.substring(itemId.search(">")+2,itemId.search("</b")-1);
+
+			var itemName = str.substring(str.search(">")+1,str.search("<"));
+			//Push to array
+			if(itemId == "Collect" || itemId == "Equip") invItems.push([itemName, str.substring(12,str.search(">")-1),""]);
+			else invItems.push(["zzz","zzz","zzz"]);
+
+			//Item only block list, only good thing to do with this item is sell it
+			if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
+			str = str.substring(1,str.length);
+		}
+	});
 	var dataString = "";
 
 	//Check if items are already collected or not
 	chrome.storage.local.get(["items"], function(data){
 		dataString = data.items+"";
 		for(var i =0;i<invItems.length;i++){
-			if(dataString.search(invItems[i][0]) > 0){
-				invItems[i][2] = "collected"
-			}else if(invItems[i][0] == "zzz"){
-				invItems[i][2] = "zzz"
-			}else invItems[i][2] = "need"
+			if(invItems[i][2] != "quicksell"){
+				if(dataString.search(invItems[i][0]) > 0){
+					invItems[i][2] = "collected"
+				}else if(invItems[i][0] == "zzz"){
+					invItems[i][2] = "zzz"
+				}else invItems[i][2] = "need"
+			}
 		}
 		//Send list over to content
-		chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems}, noCallback);
+		chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems});
 	});
 }
 
@@ -125,10 +147,12 @@ function newItemAdded(){
 		var nItem = data.newItem+"";
 		var itemList = data.items+"";
 
-		if(itemList.search(nItem) == -1){
-			itemList = itemList+";"+nItem;
-			chrome.storage.local.set({items: itemList}, function(){
-			});
+		if(nItem != ""){
+			if(itemList.search(nItem) == -1){
+				itemList = itemList+";"+nItem;
+				chrome.storage.local.set({items: itemList}, function(){
+				});
+			}
 		}
 	});
 
@@ -137,6 +161,53 @@ function newItemAdded(){
 	});
 }
 
-function noCallback(){
-	//
+
+//
+//Dynamically update the block list
+//
+function newBlockedItem(){
+	chrome.storage.local.get(["newItem","blockList"], function(data){
+		var nItem = data.newItem+"";
+		var blockListStr = data.blockList+"";
+
+		if(nItem != ""){
+			if(blockListStr.search(nItem) == -1){
+				blockListStr = blockListStr + ";" + nItem;
+				chrome.storage.local.set({blockList: blockListStr},function(){
+				});
+			}
+		}
+	});
+}
+
+
+//
+//Debug/Misc functions
+//
+
+
+//Console log the stored list
+function getStorage(){
+  chrome.storage.local.get(["newItem","items","blockList"], function(data){
+		console.log("New Item: " + data.newItem+"");
+		console.log("Item List: " + data.items+"");
+		console.log("Blocked List: " + data.blockList+"");
+	});
+}
+
+//Complete override of a list's data
+function setList(str, listName){
+	if(listName == "items"){
+		chrome.storage.local.set({items: str}, function(){
+			console.log("Item storage updated.");
+		});
+	}else if(listName == "blockList"){
+		chrome.storage.local.set({blockList: str}, function(){
+			console.log("Block list updated.");
+		});
+	}else if(listName == "newItem"){
+		chrome.storage.local.set({newItem: str}, function(){
+			console.log("New Item updated.");
+		});
+	}else console.log("List not found.");
 }
