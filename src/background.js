@@ -30,9 +30,9 @@ chrome.runtime.onInstalled.addListener(function(details){
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	if(changeInfo.status == "complete"){
 		currentTabId = tabId;
-		if(tab.url.indexOf("collection/collectables") != -1 || tab.url.indexOf("collection/items") != -1){
+		if(tab.url.search("collection/collectables") != -1 || tab.url.search("collection/items") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
-		}else if(tab.url.indexOf("inventory/items") != -1){
+		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
 		}
 	}
@@ -96,13 +96,17 @@ function checkInventory(str){
 		while(str.search('id="item-id') > -1){
 			str = str.substring(str.search('id="item-id'),str.length);
 
-			//Don't worry about foods, i.e. uncollectable
-			var itemId = str.substring(str.search('<button type="button"'),str.length);
-			itemId = itemId.substring(itemId.search(">")+2,itemId.search("</b")-1);
+			//Item Type
+			var excludeList = ["Food","Pickaxe","Axe","Shovel","Potion","Book","Event Collectable","Material"]
+			var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
+
+			for(var i = 0;i<excludeList.length;i++){
+				if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
+			}
 
 			var itemName = str.substring(str.search(">")+1,str.search("<"));
 			//Push to array
-			if(itemId == "Collect" || itemId == "Equip") invItems.push([itemName, str.substring(12,str.search(">")-1),""]);
+			if(itemType != "zzexcludezz") invItems.push([itemName, str.substring(12,str.search(">")-1),""]);
 			else invItems.push(["zzz","zzz","zzz"]);
 
 			//Item only block list, only good thing to do with this item is sell it
@@ -210,4 +214,27 @@ function setList(str, listName){
 			console.log("New Item updated.");
 		});
 	}else console.log("List not found.");
+}
+
+//Exproting lists
+function exportList(){
+	var fullListString = "";
+
+	chrome.storage.local.get(["newItem","items","blockList"], function(data){
+		fullListString = data.newItem+"\n" + data.items+"\n"+ data.blockList+"";
+	});
+
+	var blob = new Blob([fullListString],{type: "text/plain;charset=utf-8"});
+	saveAs(blob, "smmocollectionlist.txt");
+}
+
+//Importing lists
+function importList(){
+	var fullString = "";
+	const reader = new FileReader();
+	reader.onload = event => console.log(event.target.result);
+	reader.onerror = error => console.log("Reader error: "+ error);
+	fulLString = reader.readAsText(file);
+	console.log(fullString);
+
 }

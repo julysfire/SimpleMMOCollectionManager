@@ -8,6 +8,7 @@
 // TODO: Test if jQuery can work on front end to get all the collectables without having to manually go to pages
 // TODO: Inclusion of popup
 //      TODO: Import/Export of lists in popup, maybe filter all into one and have logic on an input to break up to different lists
+//      TODO: Set quicksell icon based on a input amount (i.e. anything under 4k gets the icon)
 // TODO: Get on the Chrome Store
 //
 
@@ -22,6 +23,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }
     if (msg.text === 'block_list_added'){
         addToBlock();
+        sendResponse();
+    }
+    if (msg.text === "jquery"){
+        jqueryTest();
         sendResponse();
     }
 });
@@ -46,16 +51,12 @@ function injectIcons(inventoryItems){
 //Used to notify user that item has been added to block list
 //
 function addToBlock(){
-  console.log("got here");
   var parentElement = document.getElementsByClassName("text-sm font-medium text-red-800");
   parentElement = parentElement[0].parentElement;
-  console.log(parentElement);
   var newP = document.createElement("p");
   newP.innerHTML = "SMMO Collection Manager: Item has been added to uncollectable items list.  This will be visible upon page refresh.";
   newP.className = "text-sm font-medium text-red-800";
   parentElement.appendChild(newP);
-
-  console.log(parentElement);
 }
 
 
@@ -79,9 +80,7 @@ function newNode(data){
 
 
 
-//
-//Debug/Misc functions
-//
-function noCallback(){
-	//
+
+function jqueryTest(){
+
 }
