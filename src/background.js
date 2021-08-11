@@ -4,6 +4,8 @@
 //
 // Written by Julysfire
 //
+//https://github.com/julysfire/SimpleMMOCollectionManager
+//
 //
 
 //Current tab global variable
@@ -18,7 +20,9 @@ chrome.runtime.onInstalled.addListener(function(details){
 		});
 		chrome.storage.local.set({newItem: ""}, function(){
 		});
-		chrome.storage.local.set({blockList: "Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel:Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;"}, function(){
+		chrome.storage.local.set({blockList: "Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel:Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
+		});
+		chrome.storage.local.set({quicksellThres: 0}, function(){
 		});
 	}
 });
@@ -80,13 +84,14 @@ function storeCollectionItems(str){
 // Main inventory checking method
 //
 function checkInventory(str){
-	var invItems = [];
+	var invItems = [];					//[Item Name, Item ID for injecting Icon, collected/have/quicksell]
+	var quickSellThres = getQuicksellThreshold();
 
 	//Check if a new item was just added
 	if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1){
 		newItemAdded();
 	}
-	if(str.search('class="text-sm font-medium text-red-800"') > -1){
+	if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.serach('You cannot collect') > -1){
 		newBlockedItem();
 		chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 	}
@@ -94,23 +99,36 @@ function checkInventory(str){
 	chrome.storage.local.get(["blockList"], function(data){
 		var blockListStr = data.blockList+"";
 		while(str.search('id="item-id') > -1){
+			//Find the item
 			str = str.substring(str.search('id="item-id'),str.length);
 
 			//Item Type
-			var excludeList = ["Food","Pickaxe","Axe","Shovel","Potion","Book","Event Collectable","Material"]
+			var excludeList = ["Food","Potion","Book","Event Collectable","Material"];
 			var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
-
 			for(var i = 0;i<excludeList.length;i++){
 				if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
 			}
 
+			//Quicksell amount
+			var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
+			itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
+			itemamount  = Number.parseInt(itemamount,10);
+
+			//Item Name
 			var itemName = str.substring(str.search(">")+1,str.search("<"));
+
+			//Item ID
+			var itemID = str.substring(12,str.search(">")-1);
+
 			//Push to array
-			if(itemType != "zzexcludezz") invItems.push([itemName, str.substring(12,str.search(">")-1),""]);
+			if(itemType != "zzexcludezz") invItems.push([itemName, itemID,""]);
 			else invItems.push(["zzz","zzz","zzz"]);
 
 			//Item only block list, only good thing to do with this item is sell it
 			if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
+
+			//Quicksell items threshold
+			if(quickSellThres > 0 && itemamount > quickSellThres) invItems[invItems.length-1][2] = "quicksell";
 			str = str.substring(1,str.length);
 		}
 	});
@@ -184,6 +202,15 @@ function newBlockedItem(){
 	});
 }
 
+//
+//Get and return the quicksell threshold value
+//
+function getQuicksellThreshold(){
+	chrome.storage.local.get(["quicksellThres"], function(data){
+		return data.quicksellThres;
+	});
+	return 0;
+}
 
 //
 //Debug/Misc functions
@@ -192,10 +219,11 @@ function newBlockedItem(){
 
 //Console log the stored list
 function getStorage(){
-  chrome.storage.local.get(["newItem","items","blockList"], function(data){
+  chrome.storage.local.get(["newItem","items","blockList","quicksellThres"], function(data){
 		console.log("New Item: " + data.newItem+"");
 		console.log("Item List: " + data.items+"");
 		console.log("Blocked List: " + data.blockList+"");
+		console.log("Quicksell threshold: " + data.quicksellThres+"");
 	});
 }
 
@@ -213,28 +241,9 @@ function setList(str, listName){
 		chrome.storage.local.set({newItem: str}, function(){
 			console.log("New Item updated.");
 		});
+	}else if(listName == "quicksellThres"){
+		chrome.storage.local.set({quicksellThres: Number.parseInt(str,10)}, function(){
+			console.log("Quicksell Threshold updated.");
+		});
 	}else console.log("List not found.");
-}
-
-//Exproting lists
-function exportList(){
-	var fullListString = "";
-
-	chrome.storage.local.get(["newItem","items","blockList"], function(data){
-		fullListString = data.newItem+"\n" + data.items+"\n"+ data.blockList+"";
-	});
-
-	var blob = new Blob([fullListString],{type: "text/plain;charset=utf-8"});
-	saveAs(blob, "smmocollectionlist.txt");
-}
-
-//Importing lists
-function importList(){
-	var fullString = "";
-	const reader = new FileReader();
-	reader.onload = event => console.log(event.target.result);
-	reader.onerror = error => console.log("Reader error: "+ error);
-	fulLString = reader.readAsText(file);
-	console.log(fullString);
-
 }

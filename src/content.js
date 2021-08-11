@@ -4,8 +4,8 @@
 //
 // Written by Julysfire
 //
+//https://github.com/julysfire/SimpleMMOCollectionManager
 //
-// TODO: Test if jQuery can work on front end to get all the collectables without having to manually go to pages
 // TODO: Inclusion of popup
 //      TODO: Import/Export of lists in popup, maybe filter all into one and have logic on an input to break up to different lists
 //      TODO: Set quicksell icon based on a input amount (i.e. anything under 4k gets the icon)
@@ -23,10 +23,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }
     if (msg.text === 'block_list_added'){
         addToBlock();
-        sendResponse();
-    }
-    if (msg.text === "jquery"){
-        jqueryTest();
         sendResponse();
     }
 });
@@ -76,11 +72,4 @@ function newNode(data){
       //nah
     });
   }
-}
-
-
-
-
-function jqueryTest(){
-
 }
