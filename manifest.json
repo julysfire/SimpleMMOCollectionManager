@@ -15,5 +15,10 @@
 	"web_accessible_resources": ["imgs/checkmark.png","imgs/newItem.png","imgs/quickSell.png"],
 	"icons": {"16": "imgs/icon16.png",
 						"48": "imgs/icon48.png",
-						"128": "imgs/icon128.png"}
+						"128": "imgs/icon128.png"},
+	"browser_action": {
+		"default_icon": "imgs/icon128.png",
+		"default_popup": "src/popup.html",
+		"default_title": "SMMO Collection Manager"
+	}
 }
