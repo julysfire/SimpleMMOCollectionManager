@@ -20,7 +20,7 @@ chrome.runtime.onInstalled.addListener(function(details){
 		});
 		chrome.storage.local.set({newItem: ""}, function(){
 		});
-		chrome.storage.local.set({blockList: "Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel:Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
+		chrome.storage.local.set({blockList: "Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
 		});
 		chrome.storage.local.set({quicksellThres: 0}, function(){
 		});
@@ -49,8 +49,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.text === 'new_item'){
         saveNewItem(msg.data);
-        sendResponse();
     }
+		if (msg.text === 'check_inv'){
+				chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
+		}
 });
 
 
@@ -85,18 +87,17 @@ function storeCollectionItems(str){
 //
 function checkInventory(str){
 	var invItems = [];					//[Item Name, Item ID for injecting Icon, collected/have/quicksell]
-	var quickSellThres = getQuicksellThreshold();
 
 	//Check if a new item was just added
-	if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1){
+	if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
 		newItemAdded();
 	}
-	if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.serach('You cannot collect') > -1){
+	if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1){
 		newBlockedItem();
 		chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 	}
 
-	chrome.storage.local.get(["blockList"], function(data){
+	chrome.storage.local.get(["blockList","quicksellThres"], function(data){
 		var blockListStr = data.blockList+"";
 		while(str.search('id="item-id') > -1){
 			//Find the item
@@ -112,7 +113,9 @@ function checkInventory(str){
 			//Quicksell amount
 			var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
 			itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
-			itemamount  = Number.parseInt(itemamount,10);
+			itemamount = itemamount.substring(2,itemamount.length);
+			itemamount = itemamount.replace(/,/g,"");
+			itemamount  = parseInt(itemamount);
 
 			//Item Name
 			var itemName = str.substring(str.search(">")+1,str.search("<"));
@@ -128,7 +131,7 @@ function checkInventory(str){
 			if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
 
 			//Quicksell items threshold
-			if(quickSellThres > 0 && itemamount > quickSellThres) invItems[invItems.length-1][2] = "quicksell";
+			if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
 			str = str.substring(1,str.length);
 		}
 	});
@@ -202,15 +205,7 @@ function newBlockedItem(){
 	});
 }
 
-//
-//Get and return the quicksell threshold value
-//
-function getQuicksellThreshold(){
-	chrome.storage.local.get(["quicksellThres"], function(data){
-		return data.quicksellThres;
-	});
-	return 0;
-}
+
 
 //
 //Debug/Misc functions

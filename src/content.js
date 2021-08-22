@@ -6,10 +6,6 @@
 //
 //https://github.com/julysfire/SimpleMMOCollectionManager
 //
-// TODO: Inclusion of popup
-//      TODO: Import/Export of lists in popup, maybe filter all into one and have logic on an input to break up to different lists
-//      TODO: Set quicksell icon based on a input amount (i.e. anything under 4k gets the icon)
-// TODO: Get on the Chrome Store
 //
 
 //Respond to messages from background
@@ -19,11 +15,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }
     if (msg.text === 'inject_icons'){
         injectIcons(msg.data);
-        sendResponse();
     }
     if (msg.text === 'block_list_added'){
         addToBlock();
-        sendResponse();
+    }
+    if (msg.text === 'remove_icon'){
+        removeCurrentIcons();
     }
 });
 
@@ -35,6 +32,7 @@ function injectIcons(inventoryItems){
   for(var i = 0;i<inventoryItems.length;i++){
     var spanElement = document.getElementById("item-id-"+inventoryItems[i][1]);
     var img = new Image();
+    img.id = "extensionIcon";
     if(inventoryItems[i][2] == "need") img.src = chrome.runtime.getURL("imgs/newItem.png");
     else if(inventoryItems[i][2] == "quicksell") img.src = chrome.runtime.getURL("imgs/quickSell.png");
     else img.src = chrome.runtime.getURL("imgs/checkmark.png");
@@ -53,6 +51,9 @@ function addToBlock(){
   newP.innerHTML = "SMMO Collection Manager: Item has been added to uncollectable items list.  This will be visible upon page refresh.";
   newP.className = "text-sm font-medium text-red-800";
   parentElement.appendChild(newP);
+
+  //"Refreshes" the icon list
+  removeCurrentIcons();
 }
 
 
@@ -68,8 +69,20 @@ document.addEventListener('DOMNodeInserted', newNode);
 function newNode(data){
   if(data.relatedNode.type == "button" && data.relatedNode.className == "swal2-confirm"){
     var itemName = document.getElementById("swal2-title").textContent;
-    chrome.runtime.sendMessage({text: "new_item", data: itemName},function(response){
-      //nah
-    });
+    chrome.runtime.sendMessage({text: "new_item", data: itemName});
   }
+}
+
+
+//
+//Removes the icons for when the page is "refreshing" icons
+//
+function removeCurrentIcons(){
+  for(var i = 0;i<20;i++){
+    var ico = document.getElementById('extensionIcon');
+    if(ico != null) ico.parentNode.removeChild(ico);
+  }
+
+  //Rebuild icon list
+  chrome.runtime.sendMessage({text: "check_inv"});
 }
