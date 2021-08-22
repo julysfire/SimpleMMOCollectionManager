@@ -1,0 +1,29 @@
+<html>
+	<title>Simple MMO Collection Manager</title>
+
+	<head>
+		<script src="popup.js" type="text/javascript"></script>
+	</head>
+
+	<body style="width: 200px; height: 190px;">
+		<div>
+			<div style="font-weight: bold;">Quicksell Threshold:</div>
+			<div>(0 = no threshold)
+			<input type="number" id="qsellamt" name="qsellamt">
+		</div>
+		<br>
+		<div>
+			<div style="font-weight: bold;">Import Lists</div>
+			<input accept=".csv" type="file" id="importbutt"></input>
+		</div>
+		<div>
+			<button type="button" id="exportbutt">Export lists</button>
+		</div>
+		<br>
+		<div>
+			<button type="button" id="rebuildbutt">Rebuild page icons</button>
+		</div>
+		<br>
+		<text id="notifyarea"></text>
+	</body>
+</html>
