@@ -2,28 +2,43 @@
 	<title>Simple MMO Collection Manager</title>
 
 	<head>
+		<link rel="stylesheet" type="text/css" href="popupStyles.css"</link>
 		<script src="popup.js" type="text/javascript"></script>
 	</head>
 
-	<body style="width: 200px; height: 190px;">
+	<body>
+		<!-- Header -->
+		<div class="titleDiv">
+			<a href="https://github.com/julysfire/SimpleMMOCollectionManager" target="_blank"><img src="/imgs/icon128.png" class="titleLogo"></a>
+		</div>
+
+		<!-- Body -->
 		<div>
-			<div style="font-weight: bold;">Quicksell Threshold:</div>
-			<div>(0 = no threshold)
-			<input type="number" id="qsellamt" name="qsellamt">
+			<div class="titleStyles">Quicksell Threshold</div>
+			<div>(0 = no threshold)</div>
+			<div>
+				<input class="fileInput" type="number" id="qsellamt" name="qsellamt"></input>
 		</div>
 		<br>
 		<div>
-			<div style="font-weight: bold;">Import Lists</div>
-			<input accept=".csv" type="file" id="importbutt"></input>
-		</div>
-		<div>
-			<button type="button" id="exportbutt">Export lists</button>
+			<div class="titleStyles">Import List</div>
+			<input class="hideInput" accept=".csv" type="file" id="importbutt"></input>
+			<button type="button" id="qsellamt2" name="qsellamt2">Import List from CSV</button>
 		</div>
 		<br>
 		<div>
-			<button type="button" id="rebuildbutt">Rebuild page icons</button>
+			<div class="titleStyles">Export List</div>
+			<button type="button" id="exportbutt">Save List as CSV</button>
 		</div>
 		<br>
-		<text id="notifyarea"></text>
+		<div>
+			<div class="titleStyles">Manual Icon Refresh</div>
+			<button type="button" id="rebuildbutt">Rebuild Page Icons</button>
+		</div>
+		<br>
+		<div class="responseArea">
+			<text style="display: inline-block;" id="notifyarea"></text>
+		</div>
+		<br>
 	</body>
 </html>

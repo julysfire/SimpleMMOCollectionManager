@@ -1,0 +1,53 @@
+body{
+	width: 184px;
+	height: 195px;
+}
+
+.titleLogo{
+	height: 88px;
+	width:75%;
+}
+
+.titleDiv{
+	height: 88px;
+	text-align:center;
+	border-bottom: 1px solid black;
+	margin-bottom: 10px;
+}
+
+button{
+	width: 180px;
+	font-family: "Work Sans", sans-serif;
+	letter-spacing: 0.04em;
+  border-radius: 1px;
+	border-color: gray;
+  display: flex;
+  justify-content: center;
+}
+
+.titleStyles{
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.responseArea{
+	border: 1px solid black;
+	width:180px;
+	height:40px;
+	text-align:center;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.fileInput{
+	font-family: "Work Sans", sans-serif;
+}
+
+.hideInput {
+    position: absolute;
+    z-index: 1000;
+    opacity: 0;
+    height: 20px;
+    font-size: 24px;
+    width: 180px;
+}

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded',function(){
 		console.log(event.target.files[0]);
 		//Not text file
 		var fileName = event.target.files[0].name+"";
-		if(fileName.substring(fileName.length-4,fileName.length) != ".csv") finalMessage = "Incorrect file format.  Please select .csv files only.";
+		if(fileName.substring(fileName.length-4,fileName.length) != ".csv") finalMessage = "Incorrect file format.\nPlease select .csv files only.";
 
 		if(finalMessage == ""){
 			//File reader
@@ -119,5 +119,6 @@ function quicksellChange(fullChange){
 	//Should call back and re-do icons in inventory
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
 		chrome.tabs.sendMessage(tabs[0].id, {text:"remove_icon"});
+		if(document.getElementById('notifyarea').innerHTML != "Quicksell threshold updated!") document.getElementById('notifyarea').innerHTML = "Item icons refreshed.";
 	});
 }
