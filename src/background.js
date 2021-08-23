@@ -89,69 +89,71 @@ function checkInventory(str){
 	var invItems = [];					//[Item Name, Item ID for injecting Icon, collected/have/quicksell]
 
 	//Check if a new item was just added
-	if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
-		newItemAdded();
-	}
-	if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1){
-		newBlockedItem();
-		chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
-	}
-
-	chrome.storage.local.get(["blockList","quicksellThres"], function(data){
-		var blockListStr = data.blockList+"";
-		while(str.search('id="item-id') > -1){
-			//Find the item
-			str = str.substring(str.search('id="item-id'),str.length);
-
-			//Item Type
-			var excludeList = ["Food","Potion","Book","Event Collectable","Material"];
-			var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
-			for(var i = 0;i<excludeList.length;i++){
-				if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
-			}
-
-			//Quicksell amount
-			var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
-			itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
-			itemamount = itemamount.substring(2,itemamount.length);
-			itemamount = itemamount.replace(/,/g,"");
-			itemamount  = parseInt(itemamount);
-
-			//Item Name
-			var itemName = str.substring(str.search(">")+1,str.search("<"));
-
-			//Item ID
-			var itemID = str.substring(12,str.search(">")-1);
-
-			//Push to array
-			if(itemType != "zzexcludezz") invItems.push([itemName, itemID,""]);
-			else invItems.push(["zzz","zzz","zzz"]);
-
-			//Item only block list, only good thing to do with this item is sell it
-			if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
-
-			//Quicksell items threshold
-			if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
-			str = str.substring(1,str.length);
+	if(str != undefined){
+		if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
+			newItemAdded();
 		}
-	});
-	var dataString = "";
-
-	//Check if items are already collected or not
-	chrome.storage.local.get(["items"], function(data){
-		dataString = data.items+"";
-		for(var i =0;i<invItems.length;i++){
-			if(invItems[i][2] != "quicksell"){
-				if(dataString.search(invItems[i][0]) > 0){
-					invItems[i][2] = "collected"
-				}else if(invItems[i][0] == "zzz"){
-					invItems[i][2] = "zzz"
-				}else invItems[i][2] = "need"
-			}
+		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1){
+			newBlockedItem();
+			chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 		}
-		//Send list over to content
-		chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems});
-	});
+
+		chrome.storage.local.get(["blockList","quicksellThres"], function(data){
+			var blockListStr = data.blockList+"";
+			while(str.search('id="item-id') > -1){
+				//Find the item
+				str = str.substring(str.search('id="item-id'),str.length);
+
+				//Item Type
+				var excludeList = ["Food","Potion","Book","Event Collectable","Material"];
+				var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
+				for(var i = 0;i<excludeList.length;i++){
+					if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
+				}
+
+				//Quicksell amount
+				var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
+				itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
+				itemamount = itemamount.substring(2,itemamount.length);
+				itemamount = itemamount.replace(/,/g,"");
+				itemamount  = parseInt(itemamount);
+
+				//Item Name
+				var itemName = str.substring(str.search(">")+1,str.search("<"));
+
+				//Item ID
+				var itemID = str.substring(12,str.search(">")-1);
+
+				//Push to array
+				if(itemType != "zzexcludezz") invItems.push([itemName, itemID,""]);
+				else invItems.push(["zzz","zzz","zzz"]);
+
+				//Item only block list, only good thing to do with this item is sell it
+				if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
+
+				//Quicksell items threshold
+				if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
+				str = str.substring(1,str.length);
+			}
+		});
+		var dataString = "";
+
+		//Check if items are already collected or not
+		chrome.storage.local.get(["items"], function(data){
+			dataString = data.items+"";
+			for(var i =0;i<invItems.length;i++){
+				if(invItems[i][2] != "quicksell"){
+					if(dataString.search(invItems[i][0]) > 0){
+						invItems[i][2] = "collected"
+					}else if(invItems[i][0] == "zzz"){
+						invItems[i][2] = "zzz"
+					}else invItems[i][2] = "need"
+				}
+			}
+			//Send list over to content
+			chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems});
+		});
+	}
 }
 
 
