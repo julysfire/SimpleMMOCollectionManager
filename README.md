@@ -32,7 +32,7 @@ Currently, this is not on the chrome web store.  Once I do some more development
 
 ### Current WIP
 - Get extension on webstore
-- Formatting on the popup to make it much less basic.
+
 - Better integration with Item Sprites being added to the collected list from inventory.  This would prevent buying extra.  However, still cannot get a list of already owned sprites due to no names being generated on the pages.
 - Continue exploring options that would eliminate having to go to the collection to generate the list of already collected items the first time.  This would be handy but may be border line on the rules so...that may be a wash.
 - Any bugs that may pop up.
