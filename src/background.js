@@ -20,7 +20,7 @@ chrome.runtime.onInstalled.addListener(function(details){
 		});
 		chrome.storage.local.set({newItem: ""}, function(){
 		});
-		chrome.storage.local.set({blockList: "Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
+		chrome.storage.local.set({blockList: ";Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
 		});
 		chrome.storage.local.set({quicksellThres: 0}, function(){
 		});
@@ -38,6 +38,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
 		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
+		}else if(tab.url.search("collection/avatars")){
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatars);
+		}else if(tab.url.search("collection/sprites")){
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedSprites);
 		}
 	}
 });
@@ -79,6 +83,22 @@ function storeCollectionItems(str){
 		chrome.storage.local.set({items: dataString}, function(){
 		});
 	});
+}
+
+
+//
+//Logic for finding and storing avatars
+//
+function storeCollectedAvatars(str){
+	console.log("todo");
+}
+
+
+//
+//Logic for finding and storing avatars
+//
+function storeCollectedSprites(str){
+	console.log("todo");
 }
 
 
@@ -129,7 +149,7 @@ function checkInventory(str){
 				else invItems.push(["zzz","zzz","zzz"]);
 
 				//Item only block list, only good thing to do with this item is sell it
-				if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
+				if(blockListStr.search(itemName) > 0) invItems[invItems.length-1][2] = "quicksell";
 
 				//Quicksell items threshold
 				if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
