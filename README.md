@@ -21,7 +21,7 @@ Currently, this is not on the chrome web store.  Once I do some more development
 
 
 ### Using/About the Extension
-- Any time you go to your collections page (items and collectibles), the extension will read the page for item names and add them to the internal storage for which items you have.  In this regard, I recommend going through all the pages on your collection tab (items and collectibles) after installing the extension to generate a list of what you already have.
+- **Important for first time setup**: Any time you go to your collections page (items and collectibles), the extension will read the page for item names and add them to the internal storage for which items you have.  In this regard, I recommend going through all the pages on your collection tab (items and collectibles) after installing the extension to generate a list of what you already have.
 - This extension works on any page that shows your inventory (i.e.  Market, Dumping Grounds, and of course inventory itself)
 - Items you add to your collection will automatically be updated.
 - There is a default list of items that are bought from the store.  If the extension ever finds an item that is store bought and can't be collected, it will add it to it's internal list and you won't see
