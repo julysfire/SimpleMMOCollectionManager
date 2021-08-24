@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         sendResponse(document.all[0].outerHTML);
     }
     if (msg.text === 'inject_icons'){
-        injectIcons(msg.data);
+        injectIcons(msg.data, msg.refreshFlag);
     }
     if (msg.text === 'block_list_added'){
         addToBlock();
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 //
 //Used to inject the image next to the image names
 //
-function injectIcons(inventoryItems){
+function injectIcons(inventoryItems, refreshFlag){
   for(var i = 0;i<inventoryItems.length;i++){
     var spanElement = document.getElementById("item-id-"+inventoryItems[i][1]);
     var img = new Image();
@@ -38,6 +38,8 @@ function injectIcons(inventoryItems){
     else img.src = chrome.runtime.getURL("imgs/checkmark.png");
     if(spanElement != null) spanElement.appendChild(img);
   }
+
+  if(refreshFlag) removeCurrentIcons();
 }
 
 
@@ -51,9 +53,6 @@ function addToBlock(){
   newP.innerHTML = "SMMO Collection Manager: Item has been added to uncollectable items list.  This will be visible upon page refresh.";
   newP.className = "text-sm font-medium text-red-800";
   parentElement.appendChild(newP);
-
-  //"Refreshes" the icon list
-  removeCurrentIcons();
 }
 
 

@@ -10,20 +10,21 @@
 
 //Current tab global variable
 var currentTabId;
+var storageName;
 
 //
-//First time install, setup storage
+//First time install, setup storage items
 //
 chrome.runtime.onInstalled.addListener(function(details){
 	if(details.reason == "install"){
-		chrome.storage.local.set({items: ""}, function(){
-		});
-		chrome.storage.local.set({newItem: ""}, function(){
-		});
-		chrome.storage.local.set({blockList: "Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"}, function(){
-		});
-		chrome.storage.local.set({quicksellThres: 0}, function(){
-		});
+		chrome.storage.local.set({items: ""});
+		chrome.storage.local.set({itemsAvatars: ""});
+		chrome.storage.local.set({itemsSprites: ""});
+		chrome.storage.local.set({itemsBackgrounds: ""});
+
+		chrome.storage.local.set({newItem: ""});
+		chrome.storage.local.set({blockList: ";Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"});
+		chrome.storage.local.set({quicksellThres: 0});
 	}
 });
 
@@ -36,8 +37,17 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 		currentTabId = tabId;
 		if(tab.url.search("collection/collectables") != -1 || tab.url.search("collection/items") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
-		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1){
+		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1 || tab.url.search("armoury") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
+		}else if(tab.url.search("collection/avatars") != -1){
+			storageName = "itemsAvatars";
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
+		}else if(tab.url.search("collection/sprites") != -1){
+			storageName = "itemsSprites";
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
+		}else if(tab.url.search("collection/backgrounds") != -1){
+			storageName = "itemsBackgrounds";
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
 		}
 	}
 });
@@ -76,82 +86,144 @@ function storeCollectionItems(str){
 				dataString = dataString+";"+items[i];
 			}
 		}
-		chrome.storage.local.set({items: dataString}, function(){
-		});
+		chrome.storage.local.set({items: dataString});
 	});
 }
 
+
+//
+//Logic for finding and storing avatars and sprites
+//
+function storeCollectedAvatarsSpritesBackgrounds(str){
+	var imgItems = [];
+	if(str != undefined){
+		while(str.search("flex-1 truncate justify-center text-center") > -1){
+			str = str.substring(str.search("flex-1 truncate justify-center text-center")+55,str.length);
+			imgItems.push(str.substring(0,str.search("class")-2));
+			str = str.substring(1,str.length);
+		}
+
+		//Check if they are available in storage, if not, store them
+		chrome.storage.local.get([storageName], function(data){
+			if(storageName == "itemsAvatars") var dataString = data.itemsAvatars;
+			else if(storageName == "itemsSprites") var dataString = data.itemsSprites;
+			else if(storageName == "itemsBackgrounds") var dataString = data.itemsBackgrounds;
+
+			for(var i=0;i<imgItems.length;i++){
+				if(dataString.search(imgItems[i]) == -1){
+					dataString = dataString+";"+imgItems[i];
+				}
+			}
+			if(storageName == "itemsAvatars") chrome.storage.local.set({itemsAvatars: dataString});
+			else if(storageName == "itemsSprites") chrome.storage.local.set({itemsSprites: dataString});
+			else if(storageName == "itemsBackgrounds") chrome.storage.local.set({itemsBackgrounds: dataString});
+		});
+	}
+}
 
 //
 // Main inventory checking method
 //
 function checkInventory(str){
 	var invItems = [];					//[Item Name, Item ID for injecting Icon, collected/have/quicksell]
+	var newBlock = false;
 
 	//Check if a new item was just added
 	if(str != undefined){
 		if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
 			newItemAdded();
 		}
-		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1){
+		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1 && str.search("SMMO Collection Manager: Item has been added to uncollectable items list.") < 0){
 			newBlockedItem();
+			newBlock = true;
 			chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 		}
 
 		chrome.storage.local.get(["blockList","quicksellThres"], function(data){
 			var blockListStr = data.blockList+"";
 			while(str.search('id="item-id') > -1){
-				//Find the item
+				//Get the image for the item, used for avatars/sprites/backgrounds
+				str = str.substring(str.search('class="w-10"')+18,str.length);
+				var itemImg = str.substring(0,str.search("alt=")-2);
+
+				//Find the item's details
 				str = str.substring(str.search('id="item-id'),str.length);
 
+				//Item ID
+				var itemID = str.substring(12,str.search(">")-1);
+
+				//Item Name
+				var itemName = str.substring(str.search(">")+1,str.search("<"));
+
 				//Item Type
-				var excludeList = ["Food","Potion","Book","Event Collectable","Material"];
+				var excludeList = ["Food","Potion","Book","Event Collectable","Material","Other"];
 				var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
 				for(var i = 0;i<excludeList.length;i++){
 					if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
 				}
 
-				//Quicksell amount
-				var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
-				itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
-				itemamount = itemamount.substring(2,itemamount.length);
-				itemamount = itemamount.replace(/,/g,"");
-				itemamount  = parseInt(itemamount);
+				if(itemType.search("Item Sprite") != -1){
+					invItems.push([itemImg,itemID,"its"]);
+				}else if(itemType.search("Avatar") != -1){
+					invItems.push([itemImg,itemID,"ava"]);
+				}else if(itemType.search("Background") != -1){
+					invItems.push([itemImg,itemID,"bac"]);
+				}else{
+					//Quicksell amount
+					var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
+					itemamount = (itemamount.substring(itemamount.search(">"),itemamount.search("</div>"))).trim();
+					itemamount = itemamount.substring(2,itemamount.length);
+					itemamount = itemamount.replace(/,/g,"");
+					itemamount  = parseInt(itemamount);
 
-				//Item Name
-				var itemName = str.substring(str.search(">")+1,str.search("<"));
+					//Push to array
+					if(itemType != "zzexcludezz") invItems.push([itemName, itemID,""]);
+					else invItems.push(["zzz","zzz","zzz"]);
 
-				//Item ID
-				var itemID = str.substring(12,str.search(">")-1);
+					//Item only block list, only good thing to do with this item is sell it
+					if(blockListStr.search(itemName) > 0) invItems[invItems.length-1][2] = "quicksell";
 
-				//Push to array
-				if(itemType != "zzexcludezz") invItems.push([itemName, itemID,""]);
-				else invItems.push(["zzz","zzz","zzz"]);
-
-				//Item only block list, only good thing to do with this item is sell it
-				if(blockListStr.search(itemName) != -1) invItems[invItems.length-1][2] = "quicksell";
-
-				//Quicksell items threshold
-				if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
-				str = str.substring(1,str.length);
-			}
-		});
-		var dataString = "";
-
-		//Check if items are already collected or not
-		chrome.storage.local.get(["items"], function(data){
-			dataString = data.items+"";
-			for(var i =0;i<invItems.length;i++){
-				if(invItems[i][2] != "quicksell"){
-					if(dataString.search(invItems[i][0]) > 0){
-						invItems[i][2] = "collected"
-					}else if(invItems[i][0] == "zzz"){
-						invItems[i][2] = "zzz"
-					}else invItems[i][2] = "need"
+					//Quicksell items threshold
+					if(data.quicksellThres > 0 && itemamount > data.quicksellThres) invItems[invItems.length-1][2] = "quicksell";
+					str = str.substring(1,str.length);
 				}
 			}
-			//Send list over to content
-			chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems});
+		});
+		var dataItems = ""; var dataAvas = ""; var dataSprites = ""; var dataBgs = "";
+
+		//Check if items are already collected or not
+		chrome.storage.local.get(["items","itemsAvatars","itemsSprites","itemsBackgrounds"], function(data){
+			dataItems = data.items+"";
+			dataAvas = data.itemsAvatars+"";
+			dataSprites = data.itemsSprites+"";
+			dataBgs = data.itemsBackgrounds+"";
+
+			for(var i =0;i<invItems.length;i++){
+				if(invItems[i][2] != "quicksell"){
+					if(invItems[i][2] == "its"){
+						if(dataSprites.search(invItems[i][0]) > 0){
+							invItems[i][2] = "collected";
+						}else invItems[i][2] = "need";
+					}else if(invItems[i][2] == "ava"){
+						if(dataAvas.search(invItems[i][0]) > 0){
+							invItems[i][2] = "collected";
+						}else invItems[i][2] = "need";
+					}else if(invItems[i][2] == "bac"){
+						if(dataBgs.search(invItems[i][0]) > 0){
+							invItems[i][2] = "collected";
+						}else invItems[i][2] = "need";
+					}else{
+						if(dataItems.search(invItems[i][0]) > 0){
+							invItems[i][2] = "collected";
+						}else if(invItems[i][0] == "zzz"){
+							invItems[i][2] = "zzz";
+						}else invItems[i][2] = "need";
+					}
+				}
+			}
+		//Send list over to content
+		if(newBlock) chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems, refreshFlag: true});
+		else chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems, refreshFlag: false});
 		});
 	}
 }
@@ -216,11 +288,14 @@ function newBlockedItem(){
 
 //Console log the stored list
 function getStorage(){
-  chrome.storage.local.get(["newItem","items","blockList","quicksellThres"], function(data){
+  chrome.storage.local.get(["newItem","items","blockList","quicksellThres","itemsAvatars","itemsSprites","itemsBackgrounds"], function(data){
 		console.log("New Item: " + data.newItem+"");
 		console.log("Item List: " + data.items+"");
 		console.log("Blocked List: " + data.blockList+"");
 		console.log("Quicksell threshold: " + data.quicksellThres+"");
+		console.log("Avatars: " + data.itemsAvatars+"");
+		console.log("Sprites: " + data.itemsSprites+"");
+		console.log("Backgrounds: " + data.itemsBackgrounds+"");
 	});
 }
 
@@ -241,6 +316,18 @@ function setList(str, listName){
 	}else if(listName == "quicksellThres"){
 		chrome.storage.local.set({quicksellThres: Number.parseInt(str,10)}, function(){
 			console.log("Quicksell Threshold updated.");
+		});
+	}else if(listName == "itemsAvatars"){
+		chrome.storage.local.set({itemsAvatars: str}, function(){
+			console.log("Avatar list updated.");
+		});
+	}else if(listName == "itemsSprites"){
+		chrome.storage.local.set({itemsSprites: str}, function(){
+			console.log("Sprite list updated.");
+		});
+	}else if(listName == "itemsBackgrounds"){
+		chrome.storage.local.set({itemsBackgrounds: str}, function(){
+			console.log("Background list updated.");
 		});
 	}else console.log("List not found.");
 }
