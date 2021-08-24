@@ -36,7 +36,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 		currentTabId = tabId;
 		if(tab.url.search("collection/collectables") != -1 || tab.url.search("collection/items") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
-		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1){
+		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1 || tab.url.search("armoury") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
 		}else if(tab.url.search("collection/avatars")){
 			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatars);
