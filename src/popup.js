@@ -36,13 +36,23 @@ document.addEventListener('DOMContentLoaded',function(){
 
 				//Break the list up and update storage items
 				if(fullString != undefined && fullString != ""){
-					var itemListString = fullString.substring(9,fullString.length);
-					itemListString = itemListString.replace(/\n/g,";");
-					console.log(itemListString);
-					chrome.storage.local.set({items: itemListString}, function(){
-					});
+					fullString = fullString.substring(9,fullString.length);
+					fullString = fullString.replace(/\n/g,";");
+					var fullArray = fullString.split(";")
+					var itemList = ""; var avatarList = ""; var spriteList = ""; var backgroundList = "";
 
-					finalMessage = "Item list updated!";
+					for(var i=0;i<fullArray.length;i++){
+						if(fullArray[i].substring(0,13) == "/img/sprites/") avatarList = avatarList + ";"+fullArray[i];
+						else if(fullArray[i].substring(0,11) == "/img/icons/") spriteList = spriteList + ";"+fullArray[i];
+						else if(fullArray[i].substring(0,8) == "/img/bg/") backgroundList = backgroundList + ";"+fullArray[i];
+						else itemList = itemList + ";"+fullArray[i];
+					}
+					if(itemList != "") chrome.storage.local.set({items: itemList});
+					if(avatarList != "") chrome.storage.local.set({itemsAvatars: avatarList});
+					if(spriteList != "") chrome.storage.local.set({itemsSprites: spriteList});
+					if(backgroundList != "") chrome.storage.local.set({itemsBackgrounds: backgroundList});
+
+					finalMessage = "All lists have been updated!";
 				} else finalMessage = "Selected text file was blank";
 
 				document.getElementById('notifyarea').innerHTML = finalMessage;
@@ -55,7 +65,6 @@ document.addEventListener('DOMContentLoaded',function(){
 		//Should call back and re-do icons in inventory
 		chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
 			chrome.tabs.sendMessage(tabs[0].id, {text:"remove_icon"});
-			if(document.getElementById('notifyarea').innerHTML != "Quicksell threshold updated!") document.getElementById('notifyarea').innerHTML = "Item icons refreshed.";
 		});
 	},false);
 
@@ -64,9 +73,8 @@ document.addEventListener('DOMContentLoaded',function(){
 		var fullListString = "";
 
 		//Get lists from storage
-		chrome.storage.local.get(["items"], function(data){
-			//fullListString = "ItemList; " + data.items;
-			var workingArray = (data.items+"").split(";");
+		chrome.storage.local.get(["items","itemsAvatars","itemsSprites","itemsBackgrounds"], function(data){
+			var workingArray = (data.items+data.itemsAvatars+data.itemsSprites+data.itemsBackgrounds+"").split(";");
 			fullListString = "ItemList\n" + workingArray.join("\n");
 
 			//Create new txt file

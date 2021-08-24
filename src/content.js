@@ -29,14 +29,16 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 //Used to inject the image next to the image names
 //
 function injectIcons(inventoryItems, refreshFlag){
+  var counter = 0;
   for(var i = 0;i<inventoryItems.length;i++){
     var spanElement = document.getElementById("item-id-"+inventoryItems[i][1]);
     var img = new Image();
-    img.id = "extensionIcon";
+    img.id = "extensionIcon"+counter;
     if(inventoryItems[i][2] == "need") img.src = chrome.runtime.getURL("imgs/newItem.png");
     else if(inventoryItems[i][2] == "quicksell") img.src = chrome.runtime.getURL("imgs/quickSell.png");
     else img.src = chrome.runtime.getURL("imgs/checkmark.png");
     if(spanElement != null) spanElement.appendChild(img);
+    counter++;
   }
 
   if(refreshFlag) removeCurrentIcons();
@@ -78,7 +80,7 @@ function newNode(data){
 //
 function removeCurrentIcons(){
   for(var i = 0;i<20;i++){
-    var ico = document.getElementById('extensionIcon');
+    var ico = document.getElementById('extensionIcon'+i);
     if(ico != null) ico.parentNode.removeChild(ico);
   }
 
