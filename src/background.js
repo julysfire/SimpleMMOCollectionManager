@@ -127,7 +127,7 @@ function checkInventory(str){
 				str = str.substring(str.search('id="item-id'),str.length);
 
 				//Item Type
-				var excludeList = ["Food","Potion","Book","Event Collectable","Material"];
+				var excludeList = ["Food","Potion","Book","Event Collectable","Material","Other"];
 				var itemType = str.substring(str.search("-item border-0")+15,str.search("-item border-0")+50);
 				for(var i = 0;i<excludeList.length;i++){
 					if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
