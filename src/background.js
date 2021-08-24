@@ -107,14 +107,16 @@ function storeCollectedSprites(str){
 //
 function checkInventory(str){
 	var invItems = [];					//[Item Name, Item ID for injecting Icon, collected/have/quicksell]
+	var newBlock = false;
 
 	//Check if a new item was just added
 	if(str != undefined){
 		if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
 			newItemAdded();
 		}
-		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1){
+		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1 && str.search("SMMO Collection Manager: Item has been added to uncollectable items list.") < 0){
 			newBlockedItem();
+			newBlock = true;
 			chrome.tabs.sendMessage(currentTabId, {text: "block_list_added", data: ""});
 		}
 
@@ -170,8 +172,9 @@ function checkInventory(str){
 					}else invItems[i][2] = "need"
 				}
 			}
-			//Send list over to content
-			chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems});
+		//Send list over to content
+		if(newBlock) chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems, refreshFlag: true});
+		else chrome.tabs.sendMessage(currentTabId, {text: "inject_icons", data: invItems, refreshFlag: false});
 		});
 	}
 }
