@@ -23,7 +23,7 @@ chrome.runtime.onInstalled.addListener(function(details){
 		chrome.storage.local.set({itemsBackgrounds: ""});
 
 		chrome.storage.local.set({newItem: ""});
-		chrome.storage.local.set({blockList: ";Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;String Fishing Rod;Boar;Zombie;"});
+		chrome.storage.local.set({blockList: ";Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;Strong Fishing Rod;Boar;Zombie;"});
 		chrome.storage.local.set({quicksellThres: 0});
 	}
 });

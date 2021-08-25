@@ -26,14 +26,13 @@ Currently, this is not on the chrome web store.  Once I do some more development
 - Items you add to your collection will automatically be updated.
 - There is a default list of items that are bought from the store.  If the extension ever finds an item that is store bought and can't be collected, it will add it to it's internal list and you won't see
 - No icons will be displayed for items that have no collection status (i.e. materials, potions, food)
-- It doesn't really work well super well with item sprites or avatars at the moment.  Looking to improve on that.  Unfortunately, these two pages don't list item names in the collection tab so I am unable to get a list of already owned items at the moment.
+
 - In the popup (clicking on the extension icon on taskbar or in extension dropdown), you can set a quicksell threshold limit for all items.  Setting this will make any item that quick sells more then the entered amount show a yellow $ icon instead of the green/red icon.
 - In the same popup, you can import and export your current lists.  Exported lists save as .csv files so you can easily use this in Excel.  For importing lists, you can select the .csv that was created by extension or you can make it yourself (start with "ItemList" in A1 and then each A row after that, add an item name).
 
 ### Current WIP
 - Get extension on webstore
 
-- Refactor tabs on updated
 - Dynamically add to collected list for avatars/sprites/backgrounds
 
 
