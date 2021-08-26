@@ -31,11 +31,7 @@ Currently, this is not on the chrome web store.  Once I do some more development
 - In the same popup, you can import and export your current lists.  Exported lists save as .csv files so you can easily use this in Excel.  For importing lists, you can select the .csv that was created by extension or you can make it yourself (start with "ItemList" in A1 and then each A row after that, add an item name).
 
 ### Current WIP
-- Get extension on webstore
-
-- Dynamically add to collected list for avatars/sprites/backgrounds
-
-
+- Get extension on webstore (Currently in review)
 - Continue exploring options that would eliminate having to go to the collection to generate the list of already collected items the first time.  This would be handy but may be border line on the rules so...that may be a wash.
 - Any bugs that may pop up.
 - Other stuff that comes to mind.
