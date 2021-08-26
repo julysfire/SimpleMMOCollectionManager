@@ -1,6 +1,6 @@
 //
 //
-// Background Functions
+// Popup Functions
 //
 // Written by Julysfire
 //
@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
 		//Get lists from storage
 		chrome.storage.local.get(["items"], function(data){
-			//fullListString = "ItemList; " + data.items;
 			var workingArray = (data.items+"").split(";");
 			fullListString = "ItemList\n" + workingArray.join("\n");
 
