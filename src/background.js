@@ -82,8 +82,10 @@ function storeCollectionItems(str){
 		//Check if they are available in storage, if not, store them
 		chrome.storage.local.get(["items"], function(data){
 			var dataString = data.items+"";
+			var nArray = dataString.split(";");
+
 			for(var i =0;i<items.length;i++){
-				if(dataString.search(items[i]) == -1){
+				if(nArray.includes(items[i]) == false){
 					dataString = dataString+";"+items[i];
 				}
 			}
