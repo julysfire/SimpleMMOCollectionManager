@@ -10,7 +10,7 @@
 
 //Current tab global variable
 var currentTabId;
-var storageName;
+var imgFlag = false;
 
 //
 //First time install, setup storage items
@@ -18,10 +18,6 @@ var storageName;
 chrome.runtime.onInstalled.addListener(function(details){
 	if(details.reason == "install"){
 		chrome.storage.local.set({items: ""});
-		chrome.storage.local.set({itemsAvatars: ""});
-		chrome.storage.local.set({itemsSprites: ""});
-		chrome.storage.local.set({itemsBackgrounds: ""});
-
 		chrome.storage.local.set({newItem: ""});
 		chrome.storage.local.set({blockList: ";Scalpel of Death;The Hamburger;Attuned Death;The Nokia;The Great Wall Of China;Hatreds Bite;Ivory Chestplate;Leather Armour;Weak Fishing Rod;Weak Shovel;Weak Axe;Weak Pickaxe;Fire Plate;Bootleg T-Shirt;Rusty Axe;Rusty Fishing Rod;Rusty Shovel;Rusty Pickaxe;Attuned Death;Sword for Sloths;Frozen;Simple Dagger;The Devils Right Hand;Rotten Pumpkin;Delicious Candy Cane;Some Geezers Bow;Generic Shirt;Rat;Generic Shirt;Strong Shovel;Strong Axe;Strong Pickaxe;Strong Fishing Rod;Boar;Zombie;"});
 		chrome.storage.local.set({quicksellThres: 0});
@@ -36,18 +32,13 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	if(changeInfo.status == "complete"){
 		currentTabId = tabId;
 		if(tab.url.search("collection/collectables") != -1 || tab.url.search("collection/items") != -1){
+			imgFlag = false;
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
 		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1 || tab.url.search("armoury") != -1){
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
-		}else if(tab.url.search("collection/avatars") != -1){
-			storageName = "itemsAvatars";
-			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
-		}else if(tab.url.search("collection/sprites") != -1){
-			storageName = "itemsSprites";
-			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
-		}else if(tab.url.search("collection/backgrounds") != -1){
-			storageName = "itemsBackgrounds";
-			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectedAvatarsSpritesBackgrounds);
+		}else if(tab.url.search("collection/avatars") != -1 || tab.url.search("collection/sprites") != -1 || tab.url.search("collection/backgrounds") != -1){
+			imgFlag = true;
+			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectionItems);
 		}
 	}
 });
@@ -72,54 +63,35 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 function storeCollectionItems(str){
 	//Get all item names
 	var items = [];
-	while(str.search("retrieveItem") > -1){
-		str = str.substring(str.search("retrieveItem"),str.length);
-		items.push(str.substring(str.search(">")+1,str.search("<")));
-		str = str.substring(1,str.length);
-	}
 
-	//Check if they are available in storage, if not, store them
-	chrome.storage.local.get(["items"], function(data){
-		var dataString = data.items+"";
-		for(var i =0;i<items.length;i++){
-			if(dataString.search(items[i]) == -1){
-				dataString = dataString+";"+items[i];
-			}
-		}
-		chrome.storage.local.set({items: dataString});
-	});
-}
-
-
-//
-//Logic for finding and storing avatars and sprites
-//
-function storeCollectedAvatarsSpritesBackgrounds(str){
-	var imgItems = [];
 	if(str != undefined){
-		while(str.search("flex-1 truncate justify-center text-center") > -1){
-			str = str.substring(str.search("flex-1 truncate justify-center text-center")+55,str.length);
-			imgItems.push(str.substring(0,str.search("class")-2));
-			str = str.substring(1,str.length);
+		if(imgFlag){
+			while(str.search("flex-1 truncate justify-center text-center") > -1){
+				str = str.substring(str.search("flex-1 truncate justify-center text-center")+55,str.length);
+				items.push(str.substring(0,str.search("class")-2));
+				str = str.substring(1,str.length);
+			}
+		}else{
+			while(str.search("retrieveItem") > -1){
+				str = str.substring(str.search("retrieveItem"),str.length);
+				items.push(str.substring(str.search(">")+1,str.search("<")));
+				str = str.substring(1,str.length);
+			}
 		}
 
 		//Check if they are available in storage, if not, store them
-		chrome.storage.local.get([storageName], function(data){
-			if(storageName == "itemsAvatars") var dataString = data.itemsAvatars;
-			else if(storageName == "itemsSprites") var dataString = data.itemsSprites;
-			else if(storageName == "itemsBackgrounds") var dataString = data.itemsBackgrounds;
-
-			for(var i=0;i<imgItems.length;i++){
-				if(dataString.search(imgItems[i]) == -1){
-					dataString = dataString+";"+imgItems[i];
+		chrome.storage.local.get(["items"], function(data){
+			var dataString = data.items+"";
+			for(var i =0;i<items.length;i++){
+				if(dataString.search(items[i]) == -1){
+					dataString = dataString+";"+items[i];
 				}
 			}
-			if(storageName == "itemsAvatars") chrome.storage.local.set({itemsAvatars: dataString});
-			else if(storageName == "itemsSprites") chrome.storage.local.set({itemsSprites: dataString});
-			else if(storageName == "itemsBackgrounds") chrome.storage.local.set({itemsBackgrounds: dataString});
+			chrome.storage.local.set({items: dataString});
 		});
 	}
 }
+
 
 //
 // Main inventory checking method
@@ -130,8 +102,9 @@ function checkInventory(str){
 
 	//Check if a new item was just added
 	if(str != undefined){
-		if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && str.search('The item has been collected') > -1){
+		if(str.search('class="rounded-md bg-green-50 p-4 my-4"') > -1 && (str.search('The item has been collected') > -1 || str.search('The avatar is now in your sprite collection') > -1) || str.search('The avatar is now in your avatar wardrobe') > -1){
 			newItemAdded();
+			chrome.tabs.sendMessage(currentTabId, {text: "new_collection_item", data: ""});
 		}
 		if(str.search('class="text-sm font-medium text-red-800"') > -1 && str.search('You cannot collect') > -1 && str.search("SMMO Collection Manager: Item has been added to uncollectable items list.") < 0){
 			newBlockedItem();
@@ -162,12 +135,8 @@ function checkInventory(str){
 					if(itemType.search(excludeList[i]) > 0) itemType = "zzexcludezz";
 				}
 
-				if(itemType.search("Item Sprite") != -1){
-					invItems.push([itemImg,itemID,"its"]);
-				}else if(itemType.search("Avatar") != -1){
-					invItems.push([itemImg,itemID,"ava"]);
-				}else if(itemType.search("Background") != -1){
-					invItems.push([itemImg,itemID,"bac"]);
+				if(itemType.search("Item Sprite") != -1 || itemType.search("Avatar") != -1 || itemType.search("Background") != -1){
+					invItems.push([itemImg,itemID,"img"]);
 				}else{
 					//Quicksell amount
 					var itemamount = str.substring(str.search('img src="/img/icons/I_GoldCoin.png')+35, str.length)
@@ -192,33 +161,17 @@ function checkInventory(str){
 		var dataItems = ""; var dataAvas = ""; var dataSprites = ""; var dataBgs = "";
 
 		//Check if items are already collected or not
-		chrome.storage.local.get(["items","itemsAvatars","itemsSprites","itemsBackgrounds"], function(data){
-			dataItems = data.items+"";
-			dataAvas = data.itemsAvatars+"";
-			dataSprites = data.itemsSprites+"";
-			dataBgs = data.itemsBackgrounds+"";
+		chrome.storage.local.get(["items"], function(data){
+			dataItems = (data.items+"").split(";");
+			console.log(dataItems);
 
 			for(var i =0;i<invItems.length;i++){
 				if(invItems[i][2] != "quicksell"){
-					if(invItems[i][2] == "its"){
-						if(dataSprites.search(invItems[i][0]) > 0){
-							invItems[i][2] = "collected";
-						}else invItems[i][2] = "need";
-					}else if(invItems[i][2] == "ava"){
-						if(dataAvas.search(invItems[i][0]) > 0){
-							invItems[i][2] = "collected";
-						}else invItems[i][2] = "need";
-					}else if(invItems[i][2] == "bac"){
-						if(dataBgs.search(invItems[i][0]) > 0){
-							invItems[i][2] = "collected";
-						}else invItems[i][2] = "need";
-					}else{
-						if(dataItems.search(invItems[i][0]) > 0){
-							invItems[i][2] = "collected";
-						}else if(invItems[i][0] == "zzz"){
-							invItems[i][2] = "zzz";
-						}else invItems[i][2] = "need";
-					}
+					if(dataItems.includes(invItems[i][0]) > 0){
+						invItems[i][2] = "collected";
+					}else if(invItems[i][0] == "zzz"){
+						invItems[i][2] = "zzz";
+					}else invItems[i][2] = "need";
 				}
 			}
 		//Send list over to content
@@ -233,8 +186,7 @@ function checkInventory(str){
 // For copying the new item into the local storage in case it is added to collection
 //
 function saveNewItem(data){
-	chrome.storage.local.set({newItem: data}, function(){
-	});
+	chrome.storage.local.set({newItem: data});
 }
 
 
@@ -249,15 +201,13 @@ function newItemAdded(){
 		if(nItem != ""){
 			if(itemList.search(nItem) == -1){
 				itemList = itemList+";"+nItem;
-				chrome.storage.local.set({items: itemList}, function(){
-				});
+				chrome.storage.local.set({items: itemList});
 			}
 		}
 	});
 
 	//Reset newItem storage
-	chrome.storage.local.set({newItem: ""}, function(){
-	});
+	chrome.storage.local.set({newItem: ""});
 }
 
 
@@ -272,8 +222,7 @@ function newBlockedItem(){
 		if(nItem != ""){
 			if(blockListStr.search(nItem) == -1){
 				blockListStr = blockListStr + ";" + nItem;
-				chrome.storage.local.set({blockList: blockListStr},function(){
-				});
+				chrome.storage.local.set({blockList: blockListStr});
 			}
 		}
 	});
@@ -288,14 +237,11 @@ function newBlockedItem(){
 
 //Console log the stored list
 function getStorage(){
-  chrome.storage.local.get(["newItem","items","blockList","quicksellThres","itemsAvatars","itemsSprites","itemsBackgrounds"], function(data){
+  chrome.storage.local.get(["newItem","items","blockList","quicksellThres"], function(data){
 		console.log("New Item: " + data.newItem+"");
 		console.log("Item List: " + data.items+"");
 		console.log("Blocked List: " + data.blockList+"");
 		console.log("Quicksell threshold: " + data.quicksellThres+"");
-		console.log("Avatars: " + data.itemsAvatars+"");
-		console.log("Sprites: " + data.itemsSprites+"");
-		console.log("Backgrounds: " + data.itemsBackgrounds+"");
 	});
 }
 
@@ -316,18 +262,6 @@ function setList(str, listName){
 	}else if(listName == "quicksellThres"){
 		chrome.storage.local.set({quicksellThres: Number.parseInt(str,10)}, function(){
 			console.log("Quicksell Threshold updated.");
-		});
-	}else if(listName == "itemsAvatars"){
-		chrome.storage.local.set({itemsAvatars: str}, function(){
-			console.log("Avatar list updated.");
-		});
-	}else if(listName == "itemsSprites"){
-		chrome.storage.local.set({itemsSprites: str}, function(){
-			console.log("Sprite list updated.");
-		});
-	}else if(listName == "itemsBackgrounds"){
-		chrome.storage.local.set({itemsBackgrounds: str}, function(){
-			console.log("Background list updated.");
 		});
 	}else console.log("List not found.");
 }
