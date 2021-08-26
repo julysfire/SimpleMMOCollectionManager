@@ -94,6 +94,22 @@ function storeCollectionItems(str){
 
 
 //
+//Logic for finding and storing avatars
+//
+function storeCollectedAvatars(str){
+	console.log("todo");
+}
+
+
+//
+//Logic for finding and storing avatars
+//
+function storeCollectedSprites(str){
+	console.log("todo");
+}
+
+
+//
 // Main inventory checking method
 //
 function checkInventory(str){

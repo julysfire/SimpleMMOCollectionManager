@@ -3,7 +3,7 @@
 	"description": "Helps sort which items you have already collected.",
 	"version": "1.4",
 	"manifest_version": 2,
-	"permissions": ["tabs","webNavigation","storage","unlimitedStorage","*://*.web.simple-mmo.com/*"],
+	"permissions": ["tabs","storage","unlimitedStorage","*://*.web.simple-mmo.com/*"],
 	"background":{
 		"scripts": ["src/background.js"],
 		"persistent": true

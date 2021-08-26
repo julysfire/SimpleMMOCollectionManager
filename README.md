@@ -39,3 +39,7 @@ Currently, this is not on the chrome web store.  Once I do some more development
 - Continue exploring options that would eliminate having to go to the collection to generate the list of already collected items the first time.  This would be handy but may be border line on the rules so...that may be a wash.
 - Any bugs that may pop up.
 - Other stuff that comes to mind.
+
+
+### Bug Reports
+Please contact me here by raising an issue or on Discord at julysfire#9465.
