@@ -8,7 +8,10 @@
 //
 //
 
+
+//
 //Respond to messages from background
+//
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.text === 'report_back') {
         sendResponse(document.all[0].outerHTML);
@@ -81,6 +84,8 @@ for(var i = 0;i<butts.length;i++){
     chrome.runtime.sendMessage({text: "new_item", data: img});
   });
 }
+
+
 //
 //Check for the item and check to see if it was added
 //

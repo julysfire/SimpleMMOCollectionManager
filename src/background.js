@@ -94,22 +94,6 @@ function storeCollectionItems(str){
 
 
 //
-//Logic for finding and storing avatars
-//
-function storeCollectedAvatars(str){
-	console.log("todo");
-}
-
-
-//
-//Logic for finding and storing avatars
-//
-function storeCollectedSprites(str){
-	console.log("todo");
-}
-
-
-//
 // Main inventory checking method
 //
 function checkInventory(str){
@@ -179,7 +163,6 @@ function checkInventory(str){
 		//Check if items are already collected or not
 		chrome.storage.local.get(["items"], function(data){
 			dataItems = (data.items+"").split(";");
-			console.log(dataItems);
 
 			for(var i =0;i<invItems.length;i++){
 				if(invItems[i][2] != "quicksell"){
@@ -213,9 +196,10 @@ function newItemAdded(){
 	chrome.storage.local.get(["newItem","items"],function(data){
 		var nItem = data.newItem+"";
 		var itemList = data.items+"";
+		var nArray = itemList.split(";");
 
 		if(nItem != ""){
-			if(itemList.search(nItem) == -1){
+			if(nArray.includes(nItem) == false){
 				itemList = itemList+";"+nItem;
 				chrome.storage.local.set({items: itemList});
 			}
@@ -234,9 +218,10 @@ function newBlockedItem(){
 	chrome.storage.local.get(["newItem","blockList"], function(data){
 		var nItem = data.newItem+"";
 		var blockListStr = data.blockList+"";
+		var nArray = blockListStr.split(";");
 
 		if(nItem != ""){
-			if(blockListStr.search(nItem) == -1){
+			if(nArray.includes(nItem) == false){
 				blockListStr = blockListStr + ";" + nItem;
 				chrome.storage.local.set({blockList: blockListStr});
 			}
