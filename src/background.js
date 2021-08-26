@@ -35,7 +35,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 			imgFlag = false;
 			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, storeCollectionItems);
 		}else if(tab.url.search("inventory/items") != -1 || tab.url.search("market") != -1 || tab.url.search("armoury") != -1){
-			chrome.tabs.sendMessage(currentTabId, {text: 'report_back'}, checkInventory);
+			chrome.tabs.sendMessage(currentTabId, {text: 'remove_icon'});
 		}else if(tab.url.search("collection/avatars") != -1 || tab.url.search("collection/sprites") != -1 || tab.url.search("collection/backgrounds") != -1){
 			imgFlag = true;
 			chrome.tabs.sendMessage(currentTabId, {text: "report_back"}, storeCollectionItems);
