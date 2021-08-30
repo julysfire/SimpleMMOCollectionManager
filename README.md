@@ -3,15 +3,25 @@
 #### Author: Julysfire
 Discord: julysfire#9465
 
-#### Description
+## Description
 A Chrome (Chromium based) browser extension that helps determine if you have already collected an item or collectible.  This extension store a list of all the collectibles and equipment that you have added to your collection and when you go to your inventory, will display a green checkmark next to the item name if you have collected that item already.  If you have not collected the item, it will display a red exclamation mark next to the item name.
 
 
 ![Screnshot](https://i.imgur.com/HOJPQZZ.png)
 
 
-### Installation
-Currently, this is not on the chrome web store.  Once I do some more development on the extension, I will get it uploaded to the web store.
+## Installation
+
+### Chrome Webstore
+This package is now on the Chrome Webstore where you can download and install straight from there with a click of a button.  After following the link, you can select "Add To Chrome" and it will automatically install on Chrome.
+
+[Link to item on Chrome Webstore](https://chrome.google.com/webstore/detail/simplemmo-collection-mana/ahbjmljpdknlfdgeaffcpdjeadofhplp)
+
+Any updated published to the Chrome Webstore will save the internal memory of what you have stored.  If you are installing manually, updates will wipe the memory so I advise exporting/importing if you are choosing install manually.
+
+
+### Manual Installation
+If you would like to install manually, that can be done using the below steps.
 
 1. Download the .zip from the above or via releases
 2. Unzip to wherever you would like to save the extension
@@ -21,7 +31,7 @@ Currently, this is not on the chrome web store.  Once I do some more development
 
 
 ### Using/About the Extension
-- **Important for first time setup**: Any time you go to your collections page (items and collectibles), the extension will read the page for item names and add them to the internal storage for which items you have.  In this regard, I recommend going through all the pages on your collection tab (items and collectibles) after installing the extension to generate a list of what you already have.
+- ***Important for first time setup***: Any time you go to your collections page (items and collectibles), the extension will read the page for item names and add them to the internal storage for which items you have.  In this regard, I recommend going through all the pages on your collection tab (items and collectibles) after installing the extension to generate a list of what you already have.
 - This extension works on any page that shows your inventory (i.e.  Market, Dumping Grounds, and of course inventory itself)
 - Items you add to your collection will automatically be updated.
 - There is a default list of items that are bought from the store.  If the extension ever finds an item that is store bought and can't be collected, it will add it to it's internal list and you won't see
@@ -31,7 +41,6 @@ Currently, this is not on the chrome web store.  Once I do some more development
 - In the same popup, you can import and export your current lists.  Exported lists save as .csv files so you can easily use this in Excel.  For importing lists, you can select the .csv that was created by extension or you can make it yourself (start with "ItemList" in A1 and then each A row after that, add an item name).
 
 ### Current WIP
-- Get extension on webstore (Currently in review)
 - Continue exploring options that would eliminate having to go to the collection to generate the list of already collected items the first time.  This would be handy but may be border line on the rules so...that may be a wash.
 - Any bugs that may pop up.
 - Other stuff that comes to mind.
