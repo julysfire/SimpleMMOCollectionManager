@@ -1,5 +1,7 @@
 # SimpleMMO Collection Manager
 
+# As of late 2022, this feature has been integrated into the game and this will no longer be getting updates.  Thank you to all who used this tool.
+
 #### Author: Julysfire
 Discord: julysfire#9465
 
